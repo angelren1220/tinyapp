@@ -9,6 +9,42 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// generate a string of 6 random alphnumeric characters
+// a-Z: 65-122; 0-9: 48-57
+const generateRandomString = function() {
+  let randomString = "";
+  for(let i = 0; i < 6; i++) {
+    const numOrAlph = getRandomInt(0, 1);
+    // char is number
+    if(numOrAlph) {
+      const charCode = getRandomInt(48, 57);
+      const char = String.fromCharCode(charCode);
+      randomString += char;
+      continue;
+    }
+    // char is alphabet
+    const lowerCaseOrUpperCase = getRandomInt(0, 1);
+    // lowercase
+    if(lowerCaseOrUpperCase) {
+      const charCode = getRandomInt(97, 122);
+      const char = String.fromCharCode(charCode);
+      randomString += char;
+      continue;
+    }
+    // uppercase
+    const charCode = getRandomInt(65, 90);
+    const char = String.fromCharCode(charCode);
+    randomString += char;
+  }
+  return randomString;
+};
+
+// generate a random integer between input min and max
+const getRandomInt = function(min, max) {
+  max += 1;
+  return Math.floor(Math.random() * (max - min) + min);
+};
+
 app.use(express.urlencoded({ extended: true }));
 
 // app.get("/", (req, res) => {
