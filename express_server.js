@@ -73,9 +73,17 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
-  console.log(req.body); // log the post request body to the console
-  res.send("OK");
+  const id = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[id] = longURL;
+  console.log(`${id} : ${longURL}`); // log the post request body to the console
+  res.redirect(`/urls/${id}`);
 });
 
 
@@ -89,5 +97,5 @@ app.post("/urls", (req, res) => {
 //  });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tinny app listening on port ${PORT}!`);
 });
