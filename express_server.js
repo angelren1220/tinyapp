@@ -47,17 +47,10 @@ const getRandomInt = function(min, max) {
 
 app.use(express.urlencoded({ extended: true }));
 
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
+app.get("/", (req, res) => {
+  res.redirect("/urls");
+});
 
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
@@ -101,6 +94,12 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect(`/urls`);
 });
 
+app.post("/login", (req, res) => {
+  const name = req.body.username;
+  console.log(`set username: ${name}`);
+  res.cookie("username", name);
+  res.redirect("/urls");
+});
 
 // app.get("/set", (req, res) => {
 //   const a = 1;
