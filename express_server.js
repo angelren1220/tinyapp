@@ -1,8 +1,11 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
+
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -51,26 +54,37 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-
+// show urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+// get username
+app.get("/urls", (req, res) => {
+  const tempName = { username: req.cookies["username"] };
+  res.render("partials/_header", tempName);
 });
 
+// new created url
+app.get("/urls/new", (req, res) => {
+  const tempName = { username: req.cookies["username"]};
+  res.render("urls_new", tempName);
+});
+
+// show url page
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
+// redirect to long url
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
 
+// create new url
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
@@ -79,6 +93,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+// delete url
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   console.log(`delete an exist url: { ${req.params.id} : ${urlDatabase[id]} }`);
@@ -86,29 +101,22 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+// edit url
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
   console.log(`update a new url: { ${id} : ${longURL} }`);
-  res.redirect(`/urls`);
+  res.redirect("/urls");
 });
 
+// user login
 app.post("/login", (req, res) => {
   const name = req.body.username;
   console.log(`set username: ${name}`);
   res.cookie("username", name);
   res.redirect("/urls");
 });
-
-// app.get("/set", (req, res) => {
-//   const a = 1;
-//   res.send(`a = ${a}`);
-//  });
-
-// app.get("/fetch", (req, res) => {
-//   res.send(`a = ${a}`);
-//  });
 
 app.listen(PORT, () => {
   console.log(`Tinny app listening on port ${PORT}!`);
