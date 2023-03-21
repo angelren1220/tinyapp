@@ -13,10 +13,10 @@ const urlDatabase = {
 // a-Z: 65-122; 0-9: 48-57
 const generateRandomString = function() {
   let randomString = "";
-  for(let i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) {
     const numOrAlph = getRandomInt(0, 1);
     // char is number
-    if(numOrAlph) {
+    if (numOrAlph) {
       const charCode = getRandomInt(48, 57);
       const char = String.fromCharCode(charCode);
       randomString += char;
@@ -25,7 +25,7 @@ const generateRandomString = function() {
     // char is alphabet
     const lowerCaseOrUpperCase = getRandomInt(0, 1);
     // lowercase
-    if(lowerCaseOrUpperCase) {
+    if (lowerCaseOrUpperCase) {
       const charCode = getRandomInt(97, 122);
       const char = String.fromCharCode(charCode);
       randomString += char;
@@ -91,6 +91,14 @@ app.post("/urls/:id/delete", (req, res) => {
   console.log(`delete an exist url: { ${req.params.id} : ${urlDatabase[id]} }`);
   delete urlDatabase[id];
   res.redirect("/urls");
+});
+
+app.post("/urls/:id/edit", (req, res) => {
+  const id = req.params.id;
+  const longURL = req.body.longURL;
+  urlDatabase[id] = longURL;
+  console.log(`update a new url: { ${id} : ${longURL} }`);
+  res.redirect(`/urls`);
 });
 
 
