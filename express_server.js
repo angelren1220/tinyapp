@@ -122,7 +122,17 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/");
-})
+});
+
+// register page
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.render("user_register", templateVars);
+});
 
 app.listen(PORT, () => {
   console.log(`Tinny app listening on port ${PORT}!`);
