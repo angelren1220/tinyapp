@@ -82,8 +82,15 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
-  console.log(`${id} : ${longURL}`); // log the post request body to the console
+  console.log(`create a new url: { ${id} : ${longURL} }`); // log the post request body to the console
   res.redirect(`/urls/${id}`);
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  console.log(`delete an exist url: { ${req.params.id} : ${urlDatabase[id]} }`);
+  delete urlDatabase[id];
+  res.redirect("/urls");
 });
 
 
