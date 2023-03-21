@@ -26,13 +26,13 @@
         <% for (let id in urls) { %>
           <tr>
             <td>
-              <%= id %>
+              <a href="/u/<%= id %>"><%= id %></a>
             </td>
             <td>
-              <%= urls[id] %>
+              <a href="<%= urls[id] %>"><%= urls[id] %></a>
             </td>
             <td>
-              <form method="POST" action="/urls/<%= id %>/update">
+              <form method="POST" action="/urls/<%= id %>/edit">
                 <button type="submit" class="btn btn-info">Edit</button>
               </form>
             </td>
