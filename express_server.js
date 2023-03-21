@@ -6,6 +6,7 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -48,7 +49,6 @@ const getRandomInt = function(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 };
 
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -117,6 +117,12 @@ app.post("/login", (req, res) => {
   res.cookie("username", name);
   res.redirect("/urls");
 });
+
+// user logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/");
+})
 
 app.listen(PORT, () => {
   console.log(`Tinny app listening on port ${PORT}!`);
