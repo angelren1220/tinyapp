@@ -15,7 +15,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {
+const usersDb = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -35,6 +35,16 @@ const generateRandomString = function(strLen) {
   return randomString;
 };
 
+// find user with email and return user
+const findUserByEmail = function(database, email) {
+  for(const userId in usersDb) {
+    const user = usersDb[userId]
+    if(user.email === email) {
+      return user;
+    }
+  }
+}
+
 /** server methods */
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -42,7 +52,9 @@ app.get("/", (req, res) => {
 
 // show urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, email: req.cookies["email"] };
+  const userId = req.cookies["user_id"];
+  const user = usersDb[userId];
+  const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
 // Authentication
@@ -66,30 +78,41 @@ app.post("/register", (req, res) => {
     email: req.body["email"],
     password: req.body["password"]
   };
-  users[userId] = newUser;
+  usersDb[userId] = newUser;
   res.cookie("user_id", userId); 
   //console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
-  console.log(users); // check if new user was registered
+  //console.log(usersDb); // check if new user was registered
   res.redirect("/urls");
 });
 
 // get username
-app.get("/urls", (req, res) => {
-  const templateVars = { email: req.cookies["email"] };
-  res.render("partials/_header", templateVars);
+app.get("/login", (req, res) => {
+  const templateVars = {
+    id: req.body.id,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.render("user_login", templateVars);
 });
 
 // user login
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  //console.log(`set username: ${name}`);
-  res.cookie("email", email);
+  const password = req.body.password;
+  //console.log(email, password);
+  // find user in users
+  const user = findUserByEmail(usersDb, email);
+  if(user.password !== password) {
+    return res.status(403);
+  }
+  const userId = user.id;
+  res.cookie("user_id", userId);
   res.redirect("/urls");
 });
 
 // user logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("email");
+  res.clearCookie("user_id");
   res.redirect("/");
 });
 
@@ -97,13 +120,17 @@ app.post("/logout", (req, res) => {
 
 // new created url
 app.get("/urls/new", (req, res) => {
-  const templateVars = { email: req.cookies["email"] };
+  const userId = req.cookies["user_id"];
+  const user = usersDb[userId];
+  const templateVars = { user };
   res.render("urls_new", templateVars);
 });
 
 // show url page
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], email: req.cookies["email"] };
+  const userId = req.cookies["user_id"];
+  const user = usersDb[userId];
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user };
   res.render("urls_show", templateVars);
 });
 
