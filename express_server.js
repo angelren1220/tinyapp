@@ -68,25 +68,25 @@ app.get("/", (req, res) => {
 
 // show urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, email: req.cookies["email"] };
   res.render("urls_index", templateVars);
 });
 
 // get username
 app.get("/urls", (req, res) => {
-  const tempName = { username: req.cookies["username"] };
-  res.render("partials/_header", tempName);
+  const templateVars = { email: req.cookies["email"] };
+  res.render("partials/_header", templateVars);
 });
 
 // new created url
 app.get("/urls/new", (req, res) => {
-  const tempName = { username: req.cookies["username"] };
-  res.render("urls_new", tempName);
+  const templateVars = { email: req.cookies["email"] };
+  res.render("urls_new", templateVars);
 });
 
 // show url page
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], email: req.cookies["email"] };
   res.render("urls_show", templateVars);
 });
 
@@ -125,22 +125,22 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // user login
 app.post("/login", (req, res) => {
-  const name = req.body.username;
+  const email = req.body.email;
   //console.log(`set username: ${name}`);
-  res.cookie("username", name);
+  res.cookie("email", email);
   res.redirect("/urls");
 });
 
 // user logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("email");
   res.redirect("/");
 });
 
 // register page
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.body.username,
+    id: req.body.id,
     email: req.body.email,
     password: req.body.password
   };
@@ -149,15 +149,20 @@ app.get("/register", (req, res) => {
 
 // register a new user
 app.post("/register", (req, res) => {
-  const stringLength = 12
+  const stringLength = 12;
   const userId = generateRandomString(stringLength);
-  const newUser = { id: userId, email: req.body["email"], password: req.body["password"] };
+  const newUser = {
+    id: userId,
+    email: req.body["email"],
+    password: req.body["password"]
+  };
   users[userId] = newUser;
+  res.cookie("user_id", userId); 
   //console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
   console.log(users); // check if new user was registered
-  res.redirect(`/urls`);
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
-  console.log(`Tinny app listening on port ${PORT}!`);
+  console.log(`Tinny app listening on port ${PORT} 😊!`);
 });
