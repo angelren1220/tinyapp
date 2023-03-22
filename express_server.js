@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 
+/** server setup */
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -8,6 +9,7 @@ app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+/**  mock database */
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -26,6 +28,7 @@ const users = {
   },
 };
 
+/** functions */
 // generate a string of n random alphnumeric characters
 // a-Z: 65-122; 0-9: 48-57
 // helper: generate a random integer between input min and max
@@ -61,7 +64,7 @@ const generateRandomString = function(strLen) {
   return randomString;
 };
 
-
+/** server methods */
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -71,12 +74,55 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, email: req.cookies["email"] };
   res.render("urls_index", templateVars);
 });
+// Authentication
+
+// register page
+app.get("/register", (req, res) => {
+  const templateVars = {
+    id: req.body.id,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.render("user_register", templateVars);
+});
+
+// register a new user
+app.post("/register", (req, res) => {
+  const stringLength = 12;
+  const userId = generateRandomString(stringLength);
+  const newUser = {
+    id: userId,
+    email: req.body["email"],
+    password: req.body["password"]
+  };
+  users[userId] = newUser;
+  res.cookie("user_id", userId); 
+  //console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
+  console.log(users); // check if new user was registered
+  res.redirect("/urls");
+});
 
 // get username
 app.get("/urls", (req, res) => {
   const templateVars = { email: req.cookies["email"] };
   res.render("partials/_header", templateVars);
 });
+
+// user login
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  //console.log(`set username: ${name}`);
+  res.cookie("email", email);
+  res.redirect("/urls");
+});
+
+// user logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("email");
+  res.redirect("/");
+});
+
+// CRUD
 
 // new created url
 app.get("/urls/new", (req, res) => {
@@ -120,46 +166,6 @@ app.post("/urls/:id/edit", (req, res) => {
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
   // console.log(`update a new url: { ${id} : ${longURL} }`);
-  res.redirect("/urls");
-});
-
-// user login
-app.post("/login", (req, res) => {
-  const email = req.body.email;
-  //console.log(`set username: ${name}`);
-  res.cookie("email", email);
-  res.redirect("/urls");
-});
-
-// user logout
-app.post("/logout", (req, res) => {
-  res.clearCookie("email");
-  res.redirect("/");
-});
-
-// register page
-app.get("/register", (req, res) => {
-  const templateVars = {
-    id: req.body.id,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.render("user_register", templateVars);
-});
-
-// register a new user
-app.post("/register", (req, res) => {
-  const stringLength = 12;
-  const userId = generateRandomString(stringLength);
-  const newUser = {
-    id: userId,
-    email: req.body["email"],
-    password: req.body["password"]
-  };
-  users[userId] = newUser;
-  res.cookie("user_id", userId); 
-  //console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
-  console.log(users); // check if new user was registered
   res.redirect("/urls");
 });
 
