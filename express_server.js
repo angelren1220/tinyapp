@@ -26,16 +26,16 @@ const users = {
   },
 };
 
-// generate a string of 6 random alphnumeric characters
+// generate a string of n random alphnumeric characters
 // a-Z: 65-122; 0-9: 48-57
 // helper: generate a random integer between input min and max
 const getRandomInt = function(min, max) {
   max += 1;
   return Math.floor(Math.random() * (max - min) + min);
 };
-const generateRandomString = function() {
+const generateRandomString = function(strLen) {
   let randomString = "";
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < strLen; i++) {
     const numOrAlph = getRandomInt(0, 1);
     // char is number
     if (numOrAlph) {
@@ -98,17 +98,18 @@ app.get("/u/:id", (req, res) => {
 
 // create new url
 app.post("/urls", (req, res) => {
-  const id = generateRandomString();
+  const stringLength = 6;
+  const id = generateRandomString(stringLength);
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
-  console.log(`create a new url: { ${id} : ${longURL} }`); // log the post request body to the console
+  // console.log(`create a new url: { ${id} : ${longURL} }`); // log the post request body to the console
   res.redirect(`/urls/${id}`);
 });
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  console.log(`delete an exist url: { ${req.params.id} : ${urlDatabase[id]} }`);
+  // console.log(`delete an exist url: { ${req.params.id} : ${urlDatabase[id]} }`);
   delete urlDatabase[id];
   res.redirect("/urls");
 });
@@ -118,14 +119,14 @@ app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
-  console.log(`update a new url: { ${id} : ${longURL} }`);
+  // console.log(`update a new url: { ${id} : ${longURL} }`);
   res.redirect("/urls");
 });
 
 // user login
 app.post("/login", (req, res) => {
   const name = req.body.username;
-  console.log(`set username: ${name}`);
+  //console.log(`set username: ${name}`);
   res.cookie("username", name);
   res.redirect("/urls");
 });
@@ -148,13 +149,12 @@ app.get("/register", (req, res) => {
 
 // register a new user
 app.post("/register", (req, res) => {
-  const userId = generateRandomString();
-  const userEmail = req.body["email"];
-  const userPassword = req.body["password"];
-  const newUser = { id: userId, email: userEmail, password: userPassword };
+  const stringLength = 12
+  const userId = generateRandomString(stringLength);
+  const newUser = { id: userId, email: req.body["email"], password: req.body["password"] };
   users[userId] = newUser;
-  console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
-  console.log(users);
+  //console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
+  console.log(users); // check if new user was registered
   res.redirect(`/urls`);
 });
 
