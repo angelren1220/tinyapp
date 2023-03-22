@@ -21,9 +21,9 @@
     <div class="user-information">
       <% if (user) { %>
         <form class="form-inline" action="/logout" method="POST">
-        <label for="email">Hello, <%= user.email %> !</label>
+        <label for="email" style="margin-right: 1em;">Hello, <%= user.email %>!</label>
         <div class="form-group mx-auto">
-          <button type="submit" class="btn btn-light">Logout</button>
+          <button type="submit" class="btn btn-outline-dark">Logout</button>
         </div>
       </form>
       <% } else { %> 

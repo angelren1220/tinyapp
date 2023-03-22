@@ -99,7 +99,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-// get username
+// get user
 app.get("/login", (req, res) => {
   const templateVars = {
     id: req.body.id,
@@ -132,7 +132,7 @@ app.post("/login", (req, res) => {
 // user logout
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/");
+  res.redirect("/login");
 });
 
 // CRUD
