@@ -116,8 +116,13 @@ app.post("/login", (req, res) => {
   //console.log(email, password);
   // find user in users
   const user = findUserByEmail(usersDb, email);
+  // cannot find user, send 403
+  if(!user) {
+    return res.status(403).send("Could not find the user!");
+  }
+  // is user if found but password is wrong, send 403
   if (user.password !== password) {
-    return res.status(403);
+    return res.status(403).send("Worng password!");
   }
   const userId = user.id;
   res.cookie("user_id", userId);
