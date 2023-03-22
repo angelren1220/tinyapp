@@ -23,12 +23,14 @@
         <form class="form-inline" action="/logout" method="POST">
         <label for="email">Hello, <%= user.email %> !</label>
         <div class="form-group mx-auto">
-          <button type="submit" class="btn btn-primary">Logout</button>
+          <button type="submit" class="btn btn-light">Logout</button>
         </div>
       </form>
       <% } else { %> 
-        <a class="nav-item nav-link" href="/login">Login</a>
-        <a class="nav-item nav-link" href="/register">Register</a>
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/register">Register</a>
+        </div>
       <% } %>
     </div>
   </nav>
