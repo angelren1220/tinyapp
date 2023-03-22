@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const { response } = require("express");
 
 /** server setup */
 const app = express();
@@ -37,13 +38,13 @@ const generateRandomString = function(strLen) {
 
 // find user with email and return user
 const findUserByEmail = function(database, email) {
-  for(const userId in usersDb) {
-    const user = usersDb[userId]
-    if(user.email === email) {
+  for (const userId in usersDb) {
+    const user = usersDb[userId];
+    if (user.email === email) {
       return user;
     }
   }
-}
+};
 
 /** server methods */
 app.get("/", (req, res) => {
@@ -73,13 +74,26 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const stringLength = 12;
   const userId = generateRandomString(stringLength);
+  const email = req.body["email"];
+  const password = req.body["password"];
+
+  // if either email or password is empty string, send 400
+  if (!(email && password)) {
+    return res.status(400).send("Cannot register with empty string");
+  }
+
+  // if email is already registered, send 400
+  if (findUserByEmail(usersDb, email)) {
+    return res.status(400).send("Email is already registered!");
+  }
+
   const newUser = {
     id: userId,
-    email: req.body["email"],
-    password: req.body["password"]
+    email: email,
+    password: password
   };
   usersDb[userId] = newUser;
-  res.cookie("user_id", userId); 
+  res.cookie("user_id", userId);
   //console.log(`register a new user: { ${userId} : ${userEmail}, ${userPassword} }`);
   //console.log(usersDb); // check if new user was registered
   res.redirect("/urls");
@@ -102,7 +116,7 @@ app.post("/login", (req, res) => {
   //console.log(email, password);
   // find user in users
   const user = findUserByEmail(usersDb, email);
-  if(user.password !== password) {
+  if (user.password !== password) {
     return res.status(403);
   }
   const userId = user.id;
