@@ -52,6 +52,19 @@ const findUserByEmail = function(database, email) {
   }
 };
 
+// returns the URLs where the userID === id of the currently logged-in user
+const urlsForUser = function(database, userId) {
+  const urls = {};
+  for (const url in database) {
+    if (database[url].userID === userId) {
+      const shortUrl = url;
+      const longUrl = database[url].longURL;
+      urls[shortUrl] = { longURL: longUrl, userID: userId };
+    }
+  }
+  return urls;
+};
+
 /** server methods */
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -61,20 +74,21 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is logged in, display urls
-  if(req.cookies["user_id"]) {
+  if (req.cookies["user_id"]) {
     const user = usersDb[userId];
-    const templateVars = { urls: urlDatabase, user };
+    const urls = urlsForUser(urlDatabase, userId);
+    const templateVars = { urls, user };
     return res.render("urls_index", templateVars);
   }
-  const templateVars = {urls: undefined, user: undefined};
-  res.render("urls_index", templateVars);  
+  const templateVars = { urls: undefined, user: undefined };
+  res.render("urls_index", templateVars);
 });
 // Authentication
 
 // register page
 app.get("/register", (req, res) => {
   // if user is logged in, redirect to url
-  if(req.cookies["user_id"]) {
+  if (req.cookies["user_id"]) {
     return res.redirect("/urls");
   }
 
@@ -118,7 +132,7 @@ app.post("/register", (req, res) => {
 // get user
 app.get("/login", (req, res) => {
   // if user is logged in, redirect to url
-  if(req.cookies["user_id"]) {
+  if (req.cookies["user_id"]) {
     return res.redirect("/urls");
   }
 
@@ -138,7 +152,7 @@ app.post("/login", (req, res) => {
   // find user in users
   const user = findUserByEmail(usersDb, email);
   // cannot find user, send 403
-  if(!user) {
+  if (!user) {
     return res.status(403).send("Could not find the user with email!");
   }
   // is user if found but password is wrong, send 403
@@ -162,7 +176,7 @@ app.post("/logout", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
-  if(!userId) {
+  if (!userId) {
     return res.redirect("/login");
   }
 
@@ -175,18 +189,18 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
-  if(!userId) {
+  if (!userId) {
     return res.redirect(403, "/login");
   }
 
   const user = usersDb[userId];
   const id = req.params.id;
-  
+
   // if id (short url) not exists, send 404
-  if(!(id in urlDatabase)) {
+  if (!(id in urlDatabase)) {
     return res.status(404).send("URL not found");
   }
-  
+
   const urlInfo = urlDatabase[id];
   const templateVars = { id: id, longURL: urlInfo.longURL, user };
   res.render("urls_show", templateVars);
@@ -196,7 +210,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
-  if(!userId) {
+  if (!userId) {
     return res.redirect("/login");
   }
   const id = req.params.id;
@@ -209,7 +223,7 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
-  if(!userId) {
+  if (!userId) {
     return res.status(403).send("Login to shorten URLs.");
   }
 
@@ -225,7 +239,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
-  if(!userId) {
+  if (!userId) {
     return res.status(403).send("Login to delete URLs.");
   }
 
@@ -239,7 +253,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
-  if(!userId) {
+  if (!userId) {
     return res.status(403).send("Login to edit URLs.");
   }
   const id = req.params.id;
