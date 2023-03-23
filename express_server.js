@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const methodOverride = require('method-override');
 const {
   generateRandomString,
   findUserByEmail,
@@ -20,6 +21,7 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 /** server methods */
 app.get("/", (req, res) => {
@@ -30,7 +32,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = usersDb[userId];
-  
+
   // if user is logged in, show user's urls
   if (user) {
     const urls = urlsForUser(urlDatabase, userId);
@@ -219,7 +221,8 @@ app.post("/urls", (req, res) => {
 });
 
 // delete url
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
+  console.log("deleting");
   const userId = req.session.user_id;
   const user = usersDb[userId];
   // if user is not logged in,redirect to login 
@@ -244,7 +247,8 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 // edit url
-app.post("/urls/:id/edit", (req, res) => {
+app.put("/urls/:id", (req, res) => {
+  
   const userId = req.session.user_id;
   const user = usersDb[userId];
   // if user is not logged in,redirect to login 
