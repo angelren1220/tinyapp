@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const {
   generateRandomString,
@@ -18,7 +18,7 @@ app.use(cookieSession({
   keys: ["My cat is named Oreo"],
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 app.use(express.urlencoded({ extended: true }));
 
 /** server methods */
@@ -29,17 +29,18 @@ app.get("/", (req, res) => {
 // show urls
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
+  const user = usersDb[userId];
   
-  // if user is logged in, display urls
-  if (userId) {
-    const user = usersDb[userId];
+  // if user is logged in, show user's urls
+  if (user) {
     const urls = urlsForUser(urlDatabase, userId);
     const templateVars = { urls, user };
     return res.render("urls_index", templateVars);
   }
-  
-  const templateVars = { urls: null, user: null };
-  
+
+  // if user is not logged in
+  const templateVars = { urls: null, user };
+
   res.render("urls_index", templateVars);
 });
 // Authentication
@@ -48,7 +49,8 @@ app.get("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   // if user is logged in, redirect to url
   const userId = req.session.user_id;
-  if (userId) {
+  const user = usersDb[userId];
+  if (user) {
     return res.redirect("/urls");
   }
 
@@ -57,7 +59,7 @@ app.get("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  
+
   res.render("user_register", templateVars);
 });
 
@@ -70,12 +72,12 @@ app.post("/register", (req, res) => {
 
   // if either email or password is empty string, send 400
   if (!(email && password)) {
-    return res.status(400).send("Cannot register with empty string");
+    return res.status(400).send("Cannot register with empty string! <a href='/register'>back</a>");
   }
 
   // if email is already registered, send 400
   if (findUserByEmail(usersDb, email)) {
-    return res.status(400).send("Email is already registered!");
+    return res.status(400).send("Email is already registered! <a href='/register'>back</a>");
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
   const newUser = {
@@ -83,9 +85,9 @@ app.post("/register", (req, res) => {
     email: email,
     password: hashedPassword
   };
-  
+
   usersDb[userId] = newUser;
-  
+
   req.session.user_id = userId;
   res.redirect("/urls");
 });
@@ -94,7 +96,8 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   // if user is logged in, redirect to url
   const userId = req.session.user_id;
-  if (userId) {
+  const user = usersDb[userId];
+  if (user) {
     return res.redirect("/urls");
   }
 
@@ -103,7 +106,7 @@ app.get("/login", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  
+
   res.render("user_login", templateVars);
 });
 
@@ -111,22 +114,22 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
- 
+
   // find user in users
   const user = findUserByEmail(usersDb, email);
-  
+
   // cannot find user, send 403
   if (!user) {
-    return res.status(403).send("Could not find the user with email!");
+    return res.status(403).send("Could not find the user with email! <a href='/login'>back</a>");
   }
-  
+
   // is user if found but password is wrong, send 403
   if (!bcrypt.compareSync(password, user.password)) {
-    return res.status(403).send("Wrong password!");
+    return res.status(403).send("Wrong password! <a href='/login'>back</a>");
   }
-  
+
   const userId = user.id;
-  
+
   req.session.user_id = userId;
   res.redirect("/urls");
 });
@@ -142,76 +145,74 @@ app.post("/logout", (req, res) => {
 // new created url
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
-  
+  const user = usersDb[userId];
   // if user is not logged in,redirect to login 
-  if (!userId) {
+  if (!user) {
     return res.redirect("/login");
   }
 
-  const user = usersDb[userId];
   const templateVars = { user };
-  
+
   res.render("urls_new", templateVars);
 });
 
 // show url page
 app.get("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
-  
+  const user = usersDb[userId];
   // if user is not logged in,redirect to login 
-  if (!userId) {
-    return res.redirect(403, "/login");
+  if (!user) {
+    return res.status(403).send("Please login to see information. <a href='/login'>Login</a>");
   }
 
-  const user = usersDb[userId];
   const id = req.params.id;
 
   // if id (short url) not exists, send 404
   if (!(id in urlDatabase)) {
-    return res.status(404).send("URL not found");
+    return res.status(404).send("URL not found! <a href='/urls'>back</a>");
   }
 
   const urlInfo = urlDatabase[id];
-  
+
   // if user does not own this url, send 403
-  if(urlInfo.userID !== userId) {
-    return res.status(403).send("You do not own this url.");
+  if (urlInfo.userID !== userId) {
+    return res.status(403).send("You do not own this url. <a href='/urls'>back</a>");
   }
 
   const templateVars = { id: id, longURL: urlInfo.longURL, user };
- 
+
   res.render("urls_show", templateVars);
 });
 
 // redirect to long url
 app.get("/u/:id", (req, res) => {
   const userId = req.session.user_id;
-  
+  const user = usersDb[userId];
   // if user is not logged in,redirect to login 
-  if (!userId) {
-    return res.redirect(403, "/login");
+  if (!user) {
+    return res.status(403).send("Please login to see information. <a href='/login'>Login</a>");
   }
-  
+
   const id = req.params.id;
   const urlInfo = urlDatabase[id];
   const longURL = urlInfo.longURL;
-  
+
   res.redirect(longURL);
 });
 
 // create new url
 app.post("/urls", (req, res) => {
   const userId = req.session.user_id;
-  
+  const user = usersDb[userId];
   // if user is not logged in,redirect to login 
-  if (!userId) {
-    return res.status(403).send("Login to shorten URLs.");
+  if (!user) {
+    return res.status(403).send("Login to shorten URLs. <a href='/login'>Login</a>");
   }
 
   const stringLength = 6;
   const id = generateRandomString(stringLength);
   const longURL = req.body.longURL;
- 
+
   urlDatabase[id] = { longURL: longURL, userID: userId };
 
   res.redirect(`/urls/${id}`);
@@ -220,21 +221,22 @@ app.post("/urls", (req, res) => {
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
   const userId = req.session.user_id;
+  const user = usersDb[userId];
   // if user is not logged in,redirect to login 
-  if (!userId) {
-    return res.status(403).send("Login to delete URLs.");
+  if (!user) {
+    return res.status(403).send("Login to delete URLs. <a href='/login'>Login</a>");
   }
 
   const id = req.params.id;
   // if id (short url) not exists, send 404
   if (!(id in urlDatabase)) {
-    return res.status(404).send("URL not found");
+    return res.status(404).send("URL not found. <a href='/urls'>back</a>");
   }
 
   const urlInfo = urlDatabase[id];
   // if user does not own this url, send 403
-  if(urlInfo.userID !== userId) {
-    return res.status(403).send("You do not own this url.");
+  if (urlInfo.userID !== userId) {
+    return res.status(403).send("You do not own this url. <a href='/urls'>back</a>");
   }
 
   delete urlDatabase[id];
@@ -244,22 +246,23 @@ app.post("/urls/:id/delete", (req, res) => {
 // edit url
 app.post("/urls/:id/edit", (req, res) => {
   const userId = req.session.user_id;
+  const user = usersDb[userId];
   // if user is not logged in,redirect to login 
-  if (!userId) {
-    return res.status(403).send("Login to edit URLs.");
+  if (!user) {
+    return res.status(403).send("Login to edit URLs. <a href='/login'>Login</a>");
   }
-  
+
   const id = req.params.id;
 
   // if id (short url) not exists, send 404
   if (!(id in urlDatabase)) {
-    return res.status(404).send("URL not found");
+    return res.status(404).send("URL not found. <a href='/urls'>back</a>");
   }
 
   const urlInfo = urlDatabase[id];
   // if user does not own this url, send 403
-  if(urlInfo.userID !== userId) {
-    return res.status(403).send("You do not own this url.");
+  if (urlInfo.userID !== userId) {
+    return res.status(403).send("You do not own this url. <a href='/urls'>back</a>");
   }
 
   const longURL = req.body.longURL;
