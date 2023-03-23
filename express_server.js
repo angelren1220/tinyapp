@@ -211,7 +211,7 @@ app.get("/u/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   // if user is not logged in,redirect to login 
   if (!userId) {
-    return res.redirect("/login");
+    return res.redirect(403, "/login");
   }
   const id = req.params.id;
   const urlInfo = urlDatabase[id];
