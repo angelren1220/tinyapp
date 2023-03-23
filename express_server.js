@@ -138,7 +138,7 @@ app.post("/login", (req, res) => {
 
 // user logout
 app.post("/logout", (req, res) => {
-  req.session = null;
+  req.session.user_id = null;
   res.redirect("/login");
 });
 
@@ -181,7 +181,17 @@ app.get("/urls/:id", (req, res) => {
     return res.status(403).send("You do not own this url. <a href='/urls'>back</a>");
   }
 
-  const templateVars = { id: id, longURL: urlInfo.longURL, user };
+  let totalViewTimes = req.session.total_view_times;
+
+  let userViewTimes = req.session.user_view_times;
+
+  const templateVars = {
+    id: id,
+    longURL: urlInfo.longURL,
+    user,
+    totalViewTimes,
+    userViewTimes
+  };
 
   res.render("urls_show", templateVars);
 });
@@ -198,6 +208,20 @@ app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const urlInfo = urlDatabase[id];
   const longURL = urlInfo.longURL;
+
+  // total viewed: if first time view, set total_view_times = 1
+  if (!req.session.total_view_times) {
+    req.session.total_view_times = 1;
+  } else {
+    req.session.total_view_times++;
+  }
+
+  // individual viewed: if first time view
+  if (!req.session.user_view_times) {
+    req.session.user_view_times = { userId, views: 1 };
+  } else {
+    req.session.user_view_times.views++;
+  }
 
   res.redirect(longURL);
 });
@@ -222,7 +246,6 @@ app.post("/urls", (req, res) => {
 
 // delete url
 app.delete("/urls/:id", (req, res) => {
-  console.log("deleting");
   const userId = req.session.user_id;
   const user = usersDb[userId];
   // if user is not logged in,redirect to login 
@@ -248,7 +271,7 @@ app.delete("/urls/:id", (req, res) => {
 
 // edit url
 app.put("/urls/:id", (req, res) => {
-  
+
   const userId = req.session.user_id;
   const user = usersDb[userId];
   // if user is not logged in,redirect to login 
