@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 
 /** server setup */
@@ -7,7 +7,12 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["My cat is named Oreo"],
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 app.use(express.urlencoded({ extended: true }));
 
 /**  mock database */
@@ -73,10 +78,10 @@ app.get("/", (req, res) => {
 
 // show urls
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   // if user is logged in, display urls
-  if (req.cookies["user_id"]) {
+  if (userId) {
     const user = usersDb[userId];
     const urls = urlsForUser(urlDatabase, userId);
     const templateVars = { urls, user };
@@ -92,7 +97,7 @@ app.get("/urls", (req, res) => {
 // register page
 app.get("/register", (req, res) => {
   // if user is logged in, redirect to url
-  if (req.cookies["user_id"]) {
+  if (req.session.user_id) {
     return res.redirect("/urls");
   }
 
@@ -130,14 +135,14 @@ app.post("/register", (req, res) => {
   
   usersDb[userId] = newUser;
   
-  res.cookie("user_id", userId);
+  req.session.user_id = userId;
   res.redirect("/urls");
 });
 
 // get user
 app.get("/login", (req, res) => {
   // if user is logged in, redirect to url
-  if (req.cookies["user_id"]) {
+  if (req.session.user_id) {
     return res.redirect("/urls");
   }
 
@@ -170,13 +175,13 @@ app.post("/login", (req, res) => {
   
   const userId = user.id;
   
-  res.cookie("user_id", userId);
+  req.session.user_id = userId;
   res.redirect("/urls");
 });
 
 // user logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
@@ -184,7 +189,7 @@ app.post("/logout", (req, res) => {
 
 // new created url
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   // if user is not logged in,redirect to login 
   if (!userId) {
@@ -199,7 +204,7 @@ app.get("/urls/new", (req, res) => {
 
 // show url page
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   // if user is not logged in,redirect to login 
   if (!userId) {
@@ -228,7 +233,7 @@ app.get("/urls/:id", (req, res) => {
 
 // redirect to long url
 app.get("/u/:id", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   // if user is not logged in,redirect to login 
   if (!userId) {
@@ -244,7 +249,7 @@ app.get("/u/:id", (req, res) => {
 
 // create new url
 app.post("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   
   // if user is not logged in,redirect to login 
   if (!userId) {
@@ -262,7 +267,7 @@ app.post("/urls", (req, res) => {
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   // if user is not logged in,redirect to login 
   if (!userId) {
     return res.status(403).send("Login to delete URLs.");
@@ -286,7 +291,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // edit url
 app.post("/urls/:id/edit", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   // if user is not logged in,redirect to login 
   if (!userId) {
     return res.status(403).send("Login to edit URLs.");
