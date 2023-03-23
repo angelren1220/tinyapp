@@ -30,16 +30,16 @@
               <a href="/urls/<%= id %>"><%= id %></a>
             </td>
             <td>
-              <a href="<%= urls[id] %>"><%= urls[id].longURL %></a>
+              <a href="#"><%= urls[id].longURL %></a>
             </td>
             <td>
               <form method="READ" action="/urls/<%= id %>">
-                <button type="submit" class="btn btn-info">Edit</button>
+                <button type="submit" class="btn btn-outline-info">Edit</button>
               </form>
             </td>
             <td>
               <form method="POST" action="/urls/<%= id %>/delete">
-                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
               </form>
             </td>
           </tr>
