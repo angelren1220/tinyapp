@@ -174,6 +174,11 @@ app.get("/urls/new", (req, res) => {
 // show url page
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
+  // if user is not logged in,redirect to login 
+  if(!userId) {
+    return res.redirect(403, "/login");
+  }
+
   const user = usersDb[userId];
   const id = req.params.id;
   
@@ -189,6 +194,11 @@ app.get("/urls/:id", (req, res) => {
 
 // redirect to long url
 app.get("/u/:id", (req, res) => {
+  const userId = req.cookies["user_id"];
+  // if user is not logged in,redirect to login 
+  if(!userId) {
+    return res.redirect("/login");
+  }
   const id = req.params.id;
   const urlInfo = urlDatabase[id];
   const longURL = urlInfo.longURL;
