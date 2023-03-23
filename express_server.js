@@ -38,7 +38,7 @@ app.get("/urls", (req, res) => {
     return res.render("urls_index", templateVars);
   }
   
-  const templateVars = { urls: undefined, user: undefined };
+  const templateVars = { urls: null, user: null };
   
   res.render("urls_index", templateVars);
 });
@@ -47,7 +47,8 @@ app.get("/urls", (req, res) => {
 // register page
 app.get("/register", (req, res) => {
   // if user is logged in, redirect to url
-  if (req.session.user_id) {
+  const userId = req.session.user_id;
+  if (userId) {
     return res.redirect("/urls");
   }
 
@@ -92,7 +93,8 @@ app.post("/register", (req, res) => {
 // get user
 app.get("/login", (req, res) => {
   // if user is logged in, redirect to url
-  if (req.session.user_id) {
+  const userId = req.session.user_id;
+  if (userId) {
     return res.redirect("/urls");
   }
 
