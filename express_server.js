@@ -12,8 +12,14 @@ app.use(express.urlencoded({ extended: true }));
 
 /**  mock database */
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const usersDb = {
@@ -171,14 +177,16 @@ app.get("/urls/:id", (req, res) => {
     return res.status(404).send("URL not found");
   }
   
-  const longURL = urlDatabase[id];
-  const templateVars = { id: id, longURL: longURL, user };
+  const urlInfo = urlDatabase[id];
+  const templateVars = { id: id, longURL: urlInfo.longURL, user };
   res.render("urls_show", templateVars);
 });
 
 // redirect to long url
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const id = req.params.id;
+  const urlInfo = urlDatabase[id];
+  const longURL = urlInfo.longURL;
   res.redirect(longURL);
 });
 
@@ -193,7 +201,7 @@ app.post("/urls", (req, res) => {
   const stringLength = 6;
   const id = generateRandomString(stringLength);
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  urlDatabase[id] = { longURL: longURL, userID: userId };
   // console.log(`create a new url: { ${id} : ${longURL} }`); // log the post request body to the console
   res.redirect(`/urls/${id}`);
 });
@@ -221,7 +229,7 @@ app.post("/urls/:id/edit", (req, res) => {
   }
   const id = req.params.id;
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  urlDatabase[id].longURL = longURL;
   // console.log(`update a new url: { ${id} : ${longURL} }`);
   res.redirect("/urls");
 });
