@@ -60,9 +60,14 @@ app.get("/", (req, res) => {
 // show urls
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
-  const user = usersDb[userId];
-  const templateVars = { urls: urlDatabase, user };
-  res.render("urls_index", templateVars);
+  // if user is logged in, display urls
+  if(req.cookies["user_id"]) {
+    const user = usersDb[userId];
+    const templateVars = { urls: urlDatabase, user };
+    return res.render("urls_index", templateVars);
+  }
+  const templateVars = {urls: undefined, user: undefined};
+  res.render("urls_index", templateVars);  
 });
 // Authentication
 

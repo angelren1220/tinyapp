@@ -13,6 +13,7 @@
   <%- include('partials/_header') %>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
+    <% if (urls) { %>
     <table class="table">
       <thead>
         <tr>
@@ -22,7 +23,7 @@
           <th scope="col">Delete</th>
         </tr>
       </thead>
-      <tbody>
+        <tbody>
         <% for (let id in urls) { %>
           <tr>
             <td>
@@ -42,9 +43,12 @@
               </form>
             </td>
           </tr>
-        <% } %>
       </tbody>
     </table>
+    <% } %>
+    <% } else { %>
+      <p>Please log in to see more information</p>
+    <% } %>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
