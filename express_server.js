@@ -62,6 +62,11 @@ app.get("/urls", (req, res) => {
 
 // register page
 app.get("/register", (req, res) => {
+  // if user is logged in, redirect to url
+  if(req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
+
   const templateVars = {
     id: req.body.id,
     email: req.body.email,
@@ -101,6 +106,11 @@ app.post("/register", (req, res) => {
 
 // get user
 app.get("/login", (req, res) => {
+  // if user is logged in, redirect to url
+  if(req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
+
   const templateVars = {
     id: req.body.id,
     email: req.body.email,
@@ -140,6 +150,11 @@ app.post("/logout", (req, res) => {
 // new created url
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
+  // if user is not logged in,redirect to login 
+  if(!userId) {
+    return res.redirect("/login");
+  }
+
   const user = usersDb[userId];
   const templateVars = { user };
   res.render("urls_new", templateVars);
@@ -161,6 +176,12 @@ app.get("/u/:id", (req, res) => {
 
 // create new url
 app.post("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  // if user is not logged in,redirect to login 
+  if(!userId) {
+    return res.status(403).send("Login to shorten URLs.");
+  }
+
   const stringLength = 6;
   const id = generateRandomString(stringLength);
   const longURL = req.body.longURL;
@@ -171,6 +192,12 @@ app.post("/urls", (req, res) => {
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
+  const userId = req.cookies["user_id"];
+  // if user is not logged in,redirect to login 
+  if(!userId) {
+    return res.status(403).send("Login to delete URLs.");
+  }
+
   const id = req.params.id;
   // console.log(`delete an exist url: { ${req.params.id} : ${urlDatabase[id]} }`);
   delete urlDatabase[id];
@@ -179,6 +206,11 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // edit url
 app.post("/urls/:id/edit", (req, res) => {
+  const userId = req.cookies["user_id"];
+  // if user is not logged in,redirect to login 
+  if(!userId) {
+    return res.status(403).send("Login to edit URLs.");
+  }
   const id = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
