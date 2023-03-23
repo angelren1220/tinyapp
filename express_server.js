@@ -164,7 +164,15 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = usersDb[userId];
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user };
+  const id = req.params.id;
+  
+  // if id (short url) not exists, send 404
+  if(!(id in urlDatabase)) {
+    return res.status(404).send("URL not found");
+  }
+  
+  const longURL = urlDatabase[id];
+  const templateVars = { id: id, longURL: longURL, user };
   res.render("urls_show", templateVars);
 });
 
