@@ -6,6 +6,7 @@ const {
   findUserByEmail,
   urlsForUser
 } = require("./helpers");
+const { urlDatabase, usersDb } = require("./database");
 
 /** server setup */
 const app = express();
@@ -19,31 +20,6 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
 app.use(express.urlencoded({ extended: true }));
-
-/**  mock database */
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-
-const usersDb = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
 
 /** server methods */
 app.get("/", (req, res) => {
