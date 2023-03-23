@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { response } = require("express");
+const bcrypt = require("bcryptjs");
 
 /** server setup */
 const app = express();
@@ -121,11 +121,11 @@ app.post("/register", (req, res) => {
   if (findUserByEmail(usersDb, email)) {
     return res.status(400).send("Email is already registered!");
   }
-
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const newUser = {
     id: userId,
     email: email,
-    password: password
+    password: hashedPassword
   };
   
   usersDb[userId] = newUser;
@@ -164,7 +164,7 @@ app.post("/login", (req, res) => {
   }
   
   // is user if found but password is wrong, send 403
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Wrong password!");
   }
   
