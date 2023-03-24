@@ -4,8 +4,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Urls page when user is not logged in"](https://github.com/angelren1220/tinyapp/blob/main/docs/urls-page-unlogin.png)
+!["Urls page when user is logged in"](https://github.com/angelren1220/tinyapp/blob/main/docs/urls-page-loggedin.png)
+!["Short url show page"](https://github.com/angelren1220/tinyapp/blob/main/docs/url-show-page.png)
 
 ## Dependencies
 
