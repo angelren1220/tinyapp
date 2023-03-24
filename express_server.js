@@ -61,7 +61,8 @@ app.get("/register", (req, res) => {
   const templateVars = {
     id: req.body.id,
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    user
   };
 
   res.render("user_register", templateVars);
@@ -114,7 +115,8 @@ app.get("/login", (req, res) => {
   const templateVars = {
     id: req.body.id,
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    user
   };
 
   res.render("user_login", templateVars);
