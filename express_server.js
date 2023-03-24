@@ -128,14 +128,9 @@ app.post("/login", (req, res) => {
   // find user in users database
   const user = findUserByEmail(usersDb, email);
 
-  // if cannot find user, send 403
-  if (!user) {
-    return res.status(403).send("Could not find the user with email! <a href='/login'>back</a>");
-  }
-
-  // if user is found but password is wrong, send 403
-  if (!bcrypt.compareSync(password, user.password)) {
-    return res.status(403).send("Wrong password! <a href='/login'>back</a>");
+  // if cannot find user or password is wrong, send 403
+  if (!(user && bcrypt.compareSync(password, user.password))) {
+    return res.status(403).send("Invalid login! <a href='/login'>back</a>");
   }
 
   // user found and password is correct, set cookie session for user id
