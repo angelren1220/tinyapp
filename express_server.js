@@ -24,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
 /** server methods */
+// root page
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -40,7 +41,7 @@ app.get("/urls", (req, res) => {
     return res.render("urls_index", templateVars);
   }
 
-  // if user is not logged in
+  // if user is not logged in, render null
   const templateVars = { urls: null, user };
 
   res.render("urls_index", templateVars);
@@ -56,6 +57,7 @@ app.get("/register", (req, res) => {
     return res.redirect("/urls");
   }
 
+  // otherwise create a new user template
   const templateVars = {
     id: req.body.id,
     email: req.body.email,
@@ -67,6 +69,7 @@ app.get("/register", (req, res) => {
 
 // register a new user
 app.post("/register", (req, res) => {
+  // create a new id and get all info of new user
   const stringLength = 12;
   const userId = generateRandomString(stringLength);
   const email = req.body["email"];
@@ -81,6 +84,8 @@ app.post("/register", (req, res) => {
   if (findUserByEmail(usersDb, email)) {
     return res.status(400).send("Email is already registered! <a href='/register'>back</a>");
   }
+
+  // encrypt password
   const hashedPassword = bcrypt.hashSync(password, 10);
   const newUser = {
     id: userId,
@@ -88,8 +93,10 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   };
 
+  // add new user to database
   usersDb[userId] = newUser;
 
+  // set cookie session for userId
   req.session.user_id = userId;
   res.redirect("/urls");
 });
@@ -103,6 +110,7 @@ app.get("/login", (req, res) => {
     return res.redirect("/urls");
   }
 
+  // otherwise create a user template
   const templateVars = {
     id: req.body.id,
     email: req.body.email,
@@ -117,19 +125,20 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  // find user in users
+  // find user in users database
   const user = findUserByEmail(usersDb, email);
 
-  // cannot find user, send 403
+  // if cannot find user, send 403
   if (!user) {
     return res.status(403).send("Could not find the user with email! <a href='/login'>back</a>");
   }
 
-  // is user if found but password is wrong, send 403
+  // if user is found but password is wrong, send 403
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Wrong password! <a href='/login'>back</a>");
   }
 
+  // user found and password is correct, set cookie session for user id
   const userId = user.id;
 
   req.session.user_id = userId;
@@ -138,13 +147,13 @@ app.post("/login", (req, res) => {
 
 // user logout
 app.post("/logout", (req, res) => {
+  // set user_id to null for now, may change in future for view times
   req.session.user_id = null;
   res.redirect("/login");
 });
 
 // CRUD
-
-// new created url
+// new url page
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   const user = usersDb[userId];
@@ -181,6 +190,7 @@ app.get("/urls/:id", (req, res) => {
     return res.status(403).send("You do not own this url. <a href='/urls'>back</a>");
   }
 
+  // show view times
   let totalViewTimes = req.session.total_view_times;
 
   const templateVars = {
@@ -206,6 +216,7 @@ app.get("/u/:id", (req, res) => {
   const urlInfo = urlDatabase[id];
   const longURL = urlInfo.longURL;
 
+  // count total viewed times
   // total viewed: if first time view, set total_view_times = 1
   if (!req.session.total_view_times) {
     req.session.total_view_times = 1;
@@ -225,10 +236,12 @@ app.post("/urls", (req, res) => {
     return res.status(403).send("Login to shorten URLs. <a href='/login'>Login</a>");
   }
 
+  // create a short url
   const stringLength = 6;
   const id = generateRandomString(stringLength);
+  
+  // add this url to database
   const longURL = req.body.longURL;
-
   urlDatabase[id] = { longURL: longURL, userID: userId };
 
   res.redirect(`/urls/${id}`);
@@ -282,6 +295,7 @@ app.put("/urls/:id", (req, res) => {
     return res.status(403).send("You do not own this url. <a href='/urls'>back</a>");
   }
 
+  // update url in database
   const longURL = req.body.longURL;
   urlDatabase[id].longURL = longURL;
 
