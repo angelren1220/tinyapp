@@ -183,14 +183,11 @@ app.get("/urls/:id", (req, res) => {
 
   let totalViewTimes = req.session.total_view_times;
 
-  let userViewTimes = req.session.user_view_times;
-
   const templateVars = {
     id: id,
     longURL: urlInfo.longURL,
     user,
-    totalViewTimes,
-    userViewTimes
+    totalViewTimes
   };
 
   res.render("urls_show", templateVars);
@@ -214,13 +211,6 @@ app.get("/u/:id", (req, res) => {
     req.session.total_view_times = 1;
   } else {
     req.session.total_view_times++;
-  }
-
-  // individual viewed: if first time view
-  if (!req.session.user_view_times) {
-    req.session.user_view_times = { userId, views: 1 };
-  } else {
-    req.session.user_view_times.views++;
   }
 
   res.redirect(longURL);
